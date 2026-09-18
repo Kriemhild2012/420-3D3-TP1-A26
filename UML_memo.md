@@ -1,15 +1,18 @@
 # Sujet:
-- portfolioTracker
+- portfolioTracker (ILYES)
 
 # Observers:
-- affichagePrix
-- affichageManageTitres
+- affichagePrix	(RASSIM)
+
+- affichageManageTitres	(ILYES)
 - addTicker
 - listTicker
 - modifTicker
-- affichagePortfolio
+
+- affichagePortfolio	(RYAN)
 - alertePortfolio
-- affichageAlertes
+
+- affichageAlertes	(RYAN)
 
 # Views:
-- Dashboard
+- Dashboard		(RASSIM)
