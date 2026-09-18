@@ -1,58 +1,100 @@
-from sujet import Sujet
+from modeles.sujet import Sujet
 import yfinance as yf
-from datetime import datetime
-
-TITRES = {
-    "AAPL":  {"quantite": 10, "seuil_haut": 200.0, "seuil_bas": 150.0, "prix_courant": 0, "ouverture": 0},
-    "GOOGL": {"quantite": 5,  "seuil_haut": 160.0, "seuil_bas": 120.0, "prix_courant": 0, "ouverture": 0},
-    "MSFT":  {"quantite": 8,  "seuil_haut": 430.0, "seuil_bas": 380.0, "prix_courant": 0, "ouverture": 0},
-}
 
 
+class PortfolioManager(Sujet):
+    def __init__(self):
+        super().__init__()
+        self._titres = {
+            "AAPL": {
+                "quantite": 10,
+                "seuil_haut": 200.0,
+                "seuil_bas": 150.0,
+                "prix_courant": None,
+                "ouverture": None,
+            },
+            "GOOGL": {
+                "quantite": 5,
+                "seuil_haut": 160.0,
+                "seuil_bas": 120.0,
+                "prix_courant": None,
+                "ouverture": None,
+            },
+            "MSFT":  {
+                "quantite": 8,
+                "seuil_haut": 430.0,
+                "seuil_bas": 380.0,
+                "prix_courant": None,
+				"ouverture": None,
+            }
+        }
 
-class portfolioManager(Sujet):
-	def __init__(self):
-		super().__init__()
-		self._titres = TITRES
+    def recuperer_prix(self, ticker):
+        info = yf.Ticker(ticker).fast_info
+        prix = info["last_price"]
+        ouverture = info["open"]
 
-	def recuperer_prix(self, ticker):
-		"""Retourne (prix, ouverture) pour un ticker, ou lève une erreur s'il est introuvable."""
-		info = yf.Ticker(ticker).fast_info
-		prix = info["last_price"]
-		if prix is None:
-			raise ValueError(f"Le titre '{ticker}' n'existe pas.")
-			return prix, info["open"]
+        if prix is None:
+            raise ValueError(f"Le titre '{ticker}' n'existe pas.")
 
+        return prix, ouverture
 
-	def formater_prix(self, prix, ouverture):
-		"""Retourne le texte et la couleur à afficher pour un prix et sa variation
-		par rapport à l'ouverture (vert si en hausse, rouge si en baisse)."""
-		variation = (prix - ouverture) / ouverture * 100
-		symbole = "▲" if variation >= 0 else "▼"
-		couleur = "green" if variation >= 0 else "red"
-		return f"{prix:.2f} $  {symbole} {abs(variation):.2f}%", couleur
+    def rafraichir_prix(self):
+        for ticker, infos in self._titres.items():
+            prix, ouverture = self.recuperer_prix(ticker)
+            infos["prix_courant"] = prix
+            infos["ouverture"] = ouverture
 
+        self.notifier()
 
-	def entier_positif(self, texte):
-		"""Convertit `texte` en entier strictement positif, ou lève ValueError."""
-		valeur = int(texte)
-		if valeur <= 0:
-			raise ValueError
-			return valeur
+    def ajouter_titre(self, ticker, quantite, seuil_bas, seuil_haut):
+        if ticker in self._titres:
+            raise ValueError("Ce titre existe déjà.")
 
+        prix, ouverture = self.recuperer_prix(ticker)
 
-	def flottant_positif(self, texte):
-		"""Convertit `texte` en nombre décimal strictement positif, ou lève ValueError."""
-		valeur = float(texte)
-		if valeur <= 0:
-			raise ValueError
-			return valeur
+        self._titres[ticker] = {
+            "quantite": quantite,
+            "seuil_haut": seuil_haut,
+            "seuil_bas": seuil_bas,
+            "prix_courant": prix,
+            "ouverture": ouverture,
+        }
 
-	def get_donnees(self) -> dict:
-		donnees_titres = {}
-		for e in self._titres:
-			ticker = self._titres[e].copy()
-			ticker["prix_courant"] = self.recuperer_prix(ticker)[0]
-			ticker["ouverture"] = self.recuperer_prix(ticker)[1]
+        self.notifier()
 
+    def retirer_titre(self, ticker):
+        if ticker not in self._titres:
+            raise ValueError("Ce titre n'existe pas.")
 
+        del self._titres[ticker]
+        self.notifier()
+
+    def modifier_titre(self, ticker, quantite=None,
+                       seuil_bas=None, seuil_haut=None):
+        if ticker not in self._titres:
+            raise ValueError("Ce titre n'existe pas.")
+
+        infos = self._titres[ticker]
+
+        if quantite is not None:
+            infos["quantite"] = quantite
+        if seuil_bas is not None:
+            infos["seuil_bas"] = seuil_bas
+        if seuil_haut is not None:
+            infos["seuil_haut"] = seuil_haut
+
+        self.notifier()
+
+    def get_donnees(self):
+        return {
+            "titres": {
+                ticker: infos.copy()
+                for ticker, infos in self._titres.items()
+            },
+            "valeur_totale": sum(
+                infos["prix_courant"] * infos["quantite"]
+                for infos in self._titres.values()
+                if infos["prix_courant"] is not None
+            ),
+        }
