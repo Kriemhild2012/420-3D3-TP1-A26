@@ -1,7 +1,7 @@
 from observateurs.observateur import Observateur
 import tkinter as tk
 
-class affichageManagerTitres(Observateur):
+class GestionTitresView(Observateur):
     def __init__(self, main_window: tk.Tk, sujet):
         self._sujet = sujet
         self._frame = tk.LabelFrame(main_window, text="Gérer les titres", padx=10, pady=10)
@@ -82,23 +82,31 @@ class affichageManagerTitres(Observateur):
 
     def ajouter_titre(self):
         ticker = self.entry_ticker.get().strip().upper()
-        if not ticker:
-            return
+        texte_quantite = self.entry_quantite.get().strip()
+        texte_bas = self.entry_seuil_bas_ajout.get().strip()
+        texte_haut = self.entry_seuil_haut_ajout.get().strip()
 
         try:
-            quantite = int(self.entry_quantite.get().strip())
-            seuil_bas = float(self.entry_seuil_bas_ajout.get().strip())
-            seuil_haut = float(self.entry_seuil_haut_ajout.get().strip())
-            if quantite <= 0 or seuil_bas <= 0 or seuil_haut <= 0:
-                raise ValueError
-            if seuil_bas >= seuil_haut:
-                raise ValueError
-            self._sujet.ajouter_titre(ticker, quantite, seuil_bas, seuil_haut)
+            quantite = int(texte_quantite)
+
+            if bool(texte_bas) != bool(texte_haut):
+                raise ValueError("Les deux alertes doivent être fournies ensemble.")
+
+            seuil_bas = float(texte_bas) if texte_bas else None
+            seuil_haut = float(texte_haut) if texte_haut else None
+
+            self._sujet.ajouter_titre(
+                ticker,
+                quantite,
+                seuil_bas,
+                seuil_haut,
+            )
+
         except ValueError as erreur:
-            self._statut(str(erreur) or "Les valeurs saisies sont invalides.", "red")
-            return
-        except Exception as erreur:
             self._statut(str(erreur), "red")
+            return
+        except Exception:
+            self._statut("Impossible de récupérer les données du ticker.", "red")
             return
 
         self._vider_champs(
@@ -136,17 +144,20 @@ class affichageManagerTitres(Observateur):
 
         try:
             quantite = int(quantite_texte) if quantite_texte else None
+
+            if bool(bas_texte) != bool(haut_texte):
+                raise ValueError("Les deux alertes doivent être fournies ensemble.")
+
             seuil_bas = float(bas_texte) if bas_texte else None
             seuil_haut = float(haut_texte) if haut_texte else None
-            if quantite is not None and quantite <= 0:
-                raise ValueError("La quantité doit être positive.")
-            if (seuil_bas is None) != (seuil_haut is None):
-                raise ValueError("Les deux alertes doivent être fournies ensemble.")
-            if seuil_bas is not None and (seuil_bas <= 0 or seuil_haut <= 0 or seuil_bas >= seuil_haut):
-                raise ValueError("Les alertes sont invalides.")
-            if quantite is None and seuil_bas is None:
-                raise ValueError("Entrez une valeur à modifier.")
-            self._sujet.modifier_titre(ticker, quantite, seuil_bas, seuil_haut)
+
+            self._sujet.modifier_titre(
+                ticker,
+                quantite,
+                seuil_bas,
+                seuil_haut,
+            )
+
         except ValueError as erreur:
             self._statut(str(erreur), "red")
             return
@@ -161,4 +172,3 @@ class affichageManagerTitres(Observateur):
     def _vider_champs(self, *champs):
         for champ in champs:
             champ.delete(0, tk.END)
-            
