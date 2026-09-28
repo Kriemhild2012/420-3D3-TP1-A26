@@ -3,6 +3,8 @@ from views.styles import POLICE
 from modeles.portfolio_manager import PortfolioManager
 from observateurs.manager_titres import GestionTitresView
 from observateurs.logger_CSV import LoggerCSV
+from observateurs.affichage_portfolio import AffichagePortfolio
+from observateurs.affichage_alertes import AffichageAlertes
 
 INTERVALLE_MS = 30000  # Fréquence de rafraîchissement des prix (30 secondes)
 
@@ -24,11 +26,26 @@ class Dashboard(tk.Tk):
             self,
             self.portfolio_manager,
         )
-        self.logger_csv = LoggerCSV(self.portfolio_manager)
+
+        self.logger_csv = LoggerCSV(
+            self.portfolio_manager
+        )
+
+        self.affichage_portfolio = AffichagePortfolio(
+            self,
+            self.portfolio_manager
+        )
+
+        self.affichage_alertes = AffichageAlertes(
+            self,
+            self.portfolio_manager
+        )
 
         # Abonnement des Observateurs au Sujet
         self.portfolio_manager.abonner(self.affichage_manager_titres)
         self.portfolio_manager.abonner(self.logger_csv)
+        self.portfolio_manager.abonner(self.affichage_portfolio)
+        self.portfolio_manager.abonner(self.affichage_alertes)
 
         # Lance le premier cycle dès que Tkinter démarre.
         self.after(0, self.rafraichir_prix)
