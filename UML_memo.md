@@ -2,7 +2,7 @@
 - portfolioTracker (ILYES)
 
 # Observers:
-- affichagePrix	(RASSIM)
+- affichagePrix	(RASSIM)  -- ****RESTANT****
 
 - affichageManageTitres	(ILYES)
 - addTicker
