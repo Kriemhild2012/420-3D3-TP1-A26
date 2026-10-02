@@ -1,7 +1,7 @@
 import tkinter as tk
 from views.styles import POLICE
 from modeles.portfolio_manager import PortfolioManager
-from observateurs.manager_titres import GestionTitresView
+from observateurs.manager_titres_vues import GestionTitresView
 from observateurs.logger_CSV import LoggerCSV
 
 INTERVALLE_MS = 30000  # Fréquence de rafraîchissement des prix (30 secondes)
