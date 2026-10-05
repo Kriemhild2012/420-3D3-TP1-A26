@@ -1,5 +1,6 @@
 from observateurs.observateur import Observateur
 import tkinter as tk
+from views.styles import POLICE_VALEUR
 
 
 class AffichagePortfolio(Observateur):
@@ -20,7 +21,7 @@ class AffichagePortfolio(Observateur):
         self._label_valeur = tk.Label(
             self._frame,
             text="Valeur totale : calcul en cours...",
-            font=("Segoe UI", 13, "bold")
+            font=POLICE_VALEUR
         )
         self._label_valeur.pack()
 
