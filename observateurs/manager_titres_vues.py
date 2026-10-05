@@ -1,5 +1,5 @@
 import tkinter as tk
-
+from views.styles import POLICE_PETITE, POLICE_STATUT
 from observateurs.manager_titres import GestionTitresController
 from observateurs.observateur import Observateur
 
@@ -35,7 +35,7 @@ class GestionTitresView(Observateur):
         tk.Label(
             self._frame,
             text="(Alertes optionnelles : si vides, calculées à ±20% du prix actuel)",
-            font=("Segoe UI", 8), fg="gray"
+            font=POLICE_PETITE
         ).pack(anchor="w", pady=(2, 5))
 
         ligne_liste = tk.Frame(self._frame)
@@ -52,7 +52,7 @@ class GestionTitresView(Observateur):
         self.entry_nouveau_seuil_haut = self._champ(ligne_modif, "Alerte haute", width=7)
         tk.Button(ligne_modif, text="Modifier sélection", command=self.modifier_selection).pack(side=tk.LEFT)
 
-        self._label_statut_titres = tk.Label(self._frame, text="", font=("Segoe UI", 9), fg="gray")
+        self._label_statut_titres = tk.Label(self._frame, text="", font=POLICE_STATUT, fg="gray")
         self._label_statut_titres.pack(anchor="w", pady=(5, 0))
 
     def _champ(self, parent, texte, width, valeur_defaut=""):

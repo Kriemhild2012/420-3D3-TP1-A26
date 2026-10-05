@@ -1,8 +1,9 @@
 import tkinter as tk
-from views.styles import POLICE
+from views.styles import POLICE, POLICE_TITRE
 from modeles.portfolio_manager import PortfolioManager
 from observateurs.manager_titres_vues import GestionTitresView
 from observateurs.logger_CSV import LoggerCSV
+from observateurs.affichage_prix import AffichagePrix
 from observateurs.affichage_portfolio import AffichagePortfolio
 from observateurs.affichage_alertes import AffichageAlertes
 
@@ -17,11 +18,18 @@ class Dashboard(tk.Tk):
         self.title("Portfolio Tracker")
         self.resizable(False, False)
         self.option_add("*Font", POLICE)
+        tk.Label(
+        self,text="Portfolio Tracker",font=POLICE_TITRE).pack(pady=10)
 
         # Création du Sujet
         self.portfolio_manager = PortfolioManager()
 
         # Création des Observateurs
+        self.affichage_prix = AffichagePrix(
+            self,
+            self.portfolio_manager
+)
+        
         self.affichage_manager_titres = GestionTitresView(
             self,
             self.portfolio_manager,
@@ -41,7 +49,10 @@ class Dashboard(tk.Tk):
             self.portfolio_manager
         )
 
+
         # Abonnement des Observateurs au Sujet
+        # Abonnement des Observateurs au Sujet
+        self.portfolio_manager.abonner(self.affichage_prix)
         self.portfolio_manager.abonner(self.affichage_manager_titres)
         self.portfolio_manager.abonner(self.logger_csv)
         self.portfolio_manager.abonner(self.affichage_portfolio)
